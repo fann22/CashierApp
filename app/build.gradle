@@ -1,0 +1,94 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt' // Wajib untuk Room Database (pengganti KSP di Groovy)
+
+android {
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.tehkencana.pos'
+        minSdkVersion 21
+        targetSdk 35
+        versionCode 1
+        versionName '0.1'
+
+        // Settingan agar Room Database bisa membaca Schema (Opsional tapi bagus)
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    namespace 'com.tehkencana.pos'
+
+    // --- BAGIAN PENTING: Mengaktifkan Jetpack Compose ---
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
+
+    // Konfigurasi Compiler Compose
+    composeOptions {
+        // Versi ini harus cocok dengan versi Kotlin di project-level build.gradle
+        // Jika error, coba ganti ke '1.5.1' atau sesuaikan dengan versi Kotlinmu
+        kotlinCompilerExtensionVersion '1.5.8'
+    }
+
+    // Java 1.8 atau lebih baru wajib untuk Compose
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    // --- 1. Core Android ---
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation 'androidx.activity:activity-compose:1.8.2'
+    
+    // --- 2. Jetpack Compose (UI Modern) ---
+    // Menggunakan BOM (Bill of Materials) agar versi semua library compose sinkron
+    implementation platform('androidx.compose:compose-bom:2024.02.00')
+    
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.material3:material3' // Material Design 3
+    
+    // Icon tambahan (Cart, Printer, dll ada disini)
+    implementation 'androidx.compose.material:material-icons-extended'
+
+    // Debugging Tools
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+
+    // --- 3. Room Database (Penyimpanan Lokal) ---
+    def room_version = "2.6.1"
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    kapt "androidx.room:room-compiler:$room_version" // Processor
+
+    // --- 4. Coil (Loading Gambar Async) ---
+    implementation "io.coil-kt:coil-compose:2.5.0"
+
+    // --- 5. DataStore (Simpan Setting Printer Simple) ---
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
+    // (Library lama 'appcompat' & 'constraintlayout' bisa dihapus jika full Compose,
+    // tapi dibiarkan juga tidak apa-apa untuk kompatibilitas)
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+}
